@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Data;
 using System.IO;
+using System.ComponentModel;
 
 namespace Pra.DbDisconnected.WPF
 {
@@ -15,47 +16,30 @@ namespace Pra.DbDisconnected.WPF
         {
             InitializeComponent();
         }
-        DataSet dsBookList = new DataSet("Bibliotheek");
-        string XMLDirectory = Directory.GetCurrentDirectory() + "/XMLBestanden";
-        string XMLFile = Directory.GetCurrentDirectory() + "/XMLBestanden/boeken.xml";
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (!ReadXML())
-            {
-                CreateTables();
-                FillTables();
-            }
-            dgAuthors.ItemsSource = dsBookList.Tables[0].DefaultView;
-            dgBooks.ItemsSource = dsBookList.Tables[2].DefaultView;
-            SourceDataChange();
-        }
-        private bool ReadXML()
+        DataSet dsBooks = new DataSet("Bibliotheek");
+        string xmlDirectory = Directory.GetCurrentDirectory() + "/XMLBestanden";
+        string xmlFile = Directory.GetCurrentDirectory() + "/XMLBestanden/boeken.xml";
+        
+        private bool ReadXml()
         {
             bool read = false;
-            if (Directory.Exists(XMLDirectory))
+            if (Directory.Exists(xmlDirectory))
             {
-                if (File.Exists(XMLFile))
+                if (File.Exists(xmlFile))
                 {
-                    dsBookList.ReadXml(XMLFile, XmlReadMode.ReadSchema);
+                    dsBooks.ReadXml(xmlFile, XmlReadMode.ReadSchema);
                     read = true;
                 }
             }
             return read;
         }
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (!Directory.Exists(XMLDirectory))
-                Directory.CreateDirectory(XMLDirectory);
-            if (File.Exists(XMLFile))
-                File.Delete(XMLFile);
-            dsBookList.WriteXml(XMLFile, XmlWriteMode.WriteSchema);
-        }
+
         private void CreateTables()
         {
             // creatie dtAuteur
             DataTable dtAuthor;
             dtAuthor = new DataTable();
-            dsBookList.Tables.Add(dtAuthor);
+            dsBooks.Tables.Add(dtAuthor);
 
             dtAuthor.TableName = "Auteur";
 
@@ -82,7 +66,7 @@ namespace Pra.DbDisconnected.WPF
             // creatie dtUitgever
             DataTable dtPublisher = new DataTable();
             dtPublisher.TableName = "Uitgever";
-            dsBookList.Tables.Add(dtPublisher);
+            dsBooks.Tables.Add(dtPublisher);
 
             DataColumn dcPublisherId = new DataColumn();
             dcPublisherId.ColumnName = "uitgeverID";
@@ -104,7 +88,7 @@ namespace Pra.DbDisconnected.WPF
             // creatie boeken
             DataTable dtBooks = new DataTable();
             dtBooks.TableName = "Boeken";
-            dsBookList.Tables.Add(dtBooks);
+            dsBooks.Tables.Add(dtBooks);
 
             DataColumn dcBookId = new DataColumn();
             dcBookId.ColumnName = "boekID";
@@ -122,80 +106,130 @@ namespace Pra.DbDisconnected.WPF
             dtBooks.Columns.Add("UitgeverID", typeof(int));
             dtBooks.Columns.Add("Jaartal", typeof(int));
 
-            dsBookList.Relations.Add(dsBookList.Tables[0].Columns["AuteurID"], dsBookList.Tables[2].Columns["AuteurID"]);
+            dsBooks.Relations.Add(dtAuthor.Columns["auteurID"], dtBooks.Columns["AuteurID"]);
         }
+
         private void FillTables()
         {
-            AddDataAuthor("Boon Louis");
-            AddDataAuthor("Tuchman Barbara");
-            AddDataAuthor("Cook Robin");
-            AddDataPublisher("AW Bruna");
-            AddDataPublisher("Luttingh");
+            AddAuthor("Boon Louis");
+            AddAuthor("Tuchman Barbara");
+            AddAuthor("Cook Robin");
+            AddPublisher("AW Bruna");
+            AddPublisher("Luttingh");
         }
-        private void AddDataAuthor(string name)
-        {
-            DataRow newAuthor = dsBookList.Tables["Auteur"].NewRow();
-            newAuthor["auteurNaam"] = name;
-            dsBookList.Tables["Auteur"].Rows.Add(newAuthor);
-        }
-        private void AddDataPublisher(string name)
-        {
-            DataRow newPublisher = dsBookList.Tables["Uitgever"].NewRow();
-            newPublisher["UitgeverNaam"] = name;
-            dsBookList.Tables["Uitgever"].Rows.Add(newPublisher);
-        }
-        private void Sort_Click(object sender, RoutedEventArgs e)
-        {
-            DataView sortedTable = new DataView();
-            sortedTable.Table = dsBookList.Tables["Auteur"];
-            sortedTable.Sort = "AuteurNaam desc, AuteurID desc";
-            dgAuthors.ItemsSource = sortedTable;
-        }
-        private void Filter_Click(object sender, RoutedEventArgs e)
-        {
-            DataView filteredTable = new DataView(dsBookList.Tables["Auteur"]);
-            filteredTable.RowFilter = "AuteurNaam like 'T%'";
-            dgAuthors.ItemsSource = filteredTable;
-        }
-        private void AddAuthor_Click(object sender, RoutedEventArgs e)
-        {
-            string author = txtAuthor.Text.Trim();
-            AddDataAuthor(author);
-            dgAuthors.ItemsSource = dsBookList.Tables["Auteur"].DefaultView;
-            SourceDataChange();
-        }
-        private void SourceDataChange()
-        {
-            cmbAuthors.Items.Clear();
-            cmbPublishers.Items.Clear();
-            ComboBoxItem itm;
-            for (int counter = 0; counter < dsBookList.Tables[0].Rows.Count; counter++)
-            {
-                itm = new ComboBoxItem();
-                itm.Content = (dsBookList.Tables[0].Rows[counter][1]);
-                itm.Tag = (dsBookList.Tables[0].Rows[counter][0]);
-                cmbAuthors.Items.Add(itm);
-            }
-            cmbAuthors.SelectedIndex = 0;
 
-            for (int counter = 0; counter < dsBookList.Tables[1].Rows.Count; counter++)
-            {
-                itm = new ComboBoxItem();
-                itm.Content = dsBookList.Tables[1].Rows[counter][1];
-                itm.Tag = dsBookList.Tables[1].Rows[counter][0];
-                cmbPublishers.Items.Add(itm);
-            }
-            cmbPublishers.SelectedIndex = 0;
+        private void AddAuthor(string name)
+        {
+            DataTable authors = dsBooks.Tables["Auteur"];
+            DataRow newAuthor = authors.NewRow();
+            newAuthor["auteurNaam"] = name;
+            authors.Rows.Add(newAuthor);
         }
+
+        private void RemoveAuthor(string authorId)
+        {
+            DataTable authors = dsBooks.Tables["Auteur"];
+            foreach (DataRow row in authors.Rows)
+            {
+                if (row["auteurID"].ToString() == authorId)
+                {
+                    authors.Rows.Remove(row);
+                    break;
+                }
+            }
+        }
+        private void AddPublisher(string name)
+        {
+            DataTable publishers = dsBooks.Tables["Uitgever"];
+            DataRow newPublisher = publishers.NewRow();
+            newPublisher["UitgeverNaam"] = name;
+            publishers.Rows.Add(newPublisher);
+        }
+
         private void AddBook(string title, int authorId, int publisherId, int year)
         {
-            DataRow newBook = dsBookList.Tables[2].NewRow(); //Tables[2] is Tables["Boeken"]
+            DataTable books = dsBooks.Tables["Boeken"];
+            DataRow newBook = books.NewRow();
             newBook["Titel"] = title;
             newBook["AuteurID"] = authorId;
             newBook["UitgeverID"] = publisherId;
             newBook["Jaartal"] = year;
-            dsBookList.Tables[2].Rows.Add(newBook);
+            books.Rows.Add(newBook);
         }
+
+        private void UpdateAuthorAndPublisherComboBoxes()
+        {
+            ComboBoxItem itm;
+            
+            cmbAuthors.Items.Clear();
+            cmbPublishers.Items.Clear();
+
+            DataTable authors = dsBooks.Tables["Auteur"];
+            for (int counter = 0; counter < authors.Rows.Count; counter++)
+            {
+                itm = new ComboBoxItem();
+                itm.Content = authors.Rows[counter]["auteurNaam"];
+                itm.Tag = authors.Rows[counter]["auteurID"];
+                cmbAuthors.Items.Add(itm);
+            }
+            cmbAuthors.SelectedIndex = 0;
+
+            DataTable publishers = dsBooks.Tables["Uitgever"];
+            for (int counter = 0; counter < publishers.Rows.Count; counter++)
+            {
+                itm = new ComboBoxItem();
+                itm.Content = publishers.Rows[counter]["uitgeverNaam"];
+                itm.Tag = publishers.Rows[counter]["uitgeverID"];
+                cmbPublishers.Items.Add(itm);
+            }
+            cmbPublishers.SelectedIndex = 0;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!ReadXml())
+            {
+                CreateTables();
+                FillTables();
+            }
+            dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
+            dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
+            UpdateAuthorAndPublisherComboBoxes();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (!Directory.Exists(xmlDirectory))
+                Directory.CreateDirectory(xmlDirectory);
+            if (File.Exists(xmlFile))
+                File.Delete(xmlFile);
+            dsBooks.WriteXml(xmlFile, XmlWriteMode.WriteSchema);
+        }
+
+        private void Sort_Click(object sender, RoutedEventArgs e)
+        {
+            DataView sortedTable = new DataView();
+            sortedTable.Table = dsBooks.Tables["Auteur"];
+            sortedTable.Sort = "AuteurNaam desc, AuteurID desc";
+            dgAuthors.ItemsSource = sortedTable;
+        }
+
+        private void Filter_Click(object sender, RoutedEventArgs e)
+        {
+            DataView filteredTable = new DataView(dsBooks.Tables["Auteur"]);
+            filteredTable.RowFilter = "AuteurNaam like 'T%'";
+            dgAuthors.ItemsSource = filteredTable;
+        }
+
+        private void AddAuthor_Click(object sender, RoutedEventArgs e)
+        {
+            string author = txtAuthor.Text.Trim();
+            AddAuthor(author);
+            dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
+            UpdateAuthorAndPublisherComboBoxes();
+            txtAuthor.Clear();
+        }
+
         private void AddBook_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -204,39 +238,32 @@ namespace Pra.DbDisconnected.WPF
                 int year = int.Parse(txtYear.Text);
                 ComboBoxItem itm;
                 itm = (ComboBoxItem)cmbAuthors.SelectedItem;
-                int IDauthor = int.Parse(itm.Tag.ToString());
+                int authorId = int.Parse(itm.Tag.ToString());
                 itm = (ComboBoxItem)cmbPublishers.SelectedItem;
-                int IDpublisher = int.Parse(itm.Tag.ToString());
-                AddBook(title, IDauthor, IDpublisher, year);
-                dgBooks.ItemsSource = dsBookList.Tables[2].DefaultView;
+                int publisherId = int.Parse(itm.Tag.ToString());
+
+                AddBook(title, authorId, publisherId, year);
+
+                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
+                txtTitle.Clear();
+                txtYear.Clear();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Foute ingave \nReden :" + ex.Message);
             }
         }
+
         private void RemoveAuthor_Click(object sender, RoutedEventArgs e)
         {
             if (dgAuthors.SelectedIndex > -1)
             {
-                string searchAuthorId = dgAuthors.SelectedValue.ToString();
-                foreach (DataRow row in dsBookList.Tables[0].Rows)
-                {
-                    if (row["auteurID"].ToString() == searchAuthorId)
-                    {
-                        dsBookList.Tables[0].Rows.Remove(row);
-                        break;
-                    }
-                }
-                SourceDataChange();
-                dgAuthors.ItemsSource = dsBookList.Tables[0].DefaultView;
-                dgBooks.ItemsSource = dsBookList.Tables[2].DefaultView;
+                string authorId = dgAuthors.SelectedValue.ToString();
+                RemoveAuthor(authorId);
+                UpdateAuthorAndPublisherComboBoxes();
+                dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
+                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
             }
         }
-
-
-
-
-
     }
 }

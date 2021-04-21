@@ -107,6 +107,7 @@ namespace Pra.DbDisconnected.WPF
             dtBooks.Columns.Add("Jaartal", typeof(int));
 
             dsBooks.Relations.Add(dtAuthor.Columns["auteurID"], dtBooks.Columns["AuteurID"]);
+            dsBooks.Relations.Add(dtPublisher.Columns["uitgeverID"], dtBooks.Columns["UitgeverID"]);
         }
 
         private void FillTables()

@@ -247,11 +247,12 @@ namespace Pra.DbDisconnected.WPF
             {
                 string title = txtTitle.Text;
                 int year = int.Parse(txtYear.Text);
-                ComboBoxItem itm;
-                itm = (ComboBoxItem)cmbAuthors.SelectedItem;
-                int authorId = int.Parse(itm.Tag.ToString());
-                itm = (ComboBoxItem)cmbPublishers.SelectedItem;
-                int publisherId = int.Parse(itm.Tag.ToString());
+
+                ComboBoxItem author = (ComboBoxItem)cmbAuthors.SelectedItem;
+                int authorId = int.Parse(author.Tag.ToString());
+                
+                ComboBoxItem publisher = (ComboBoxItem)cmbPublishers.SelectedItem;
+                int publisherId = int.Parse(publisher.Tag.ToString());
 
                 AddBook(title, authorId, publisherId, year);
 

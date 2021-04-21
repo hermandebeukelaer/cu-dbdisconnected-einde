@@ -230,6 +230,18 @@ namespace Pra.DbDisconnected.WPF
             txtAuthor.Clear();
         }
 
+        private void RemoveAuthor_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgAuthors.SelectedIndex > -1)
+            {
+                string authorId = dgAuthors.SelectedValue.ToString();
+                RemoveAuthor(authorId);
+                UpdateAuthorAndPublisherComboBoxes();
+                dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
+                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
+            }
+        }
+
         private void AddBook_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -251,18 +263,6 @@ namespace Pra.DbDisconnected.WPF
             catch (Exception ex)
             {
                 MessageBox.Show("Foute ingave \nReden :" + ex.Message);
-            }
-        }
-
-        private void RemoveAuthor_Click(object sender, RoutedEventArgs e)
-        {
-            if (dgAuthors.SelectedIndex > -1)
-            {
-                string authorId = dgAuthors.SelectedValue.ToString();
-                RemoveAuthor(authorId);
-                UpdateAuthorAndPublisherComboBoxes();
-                dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
-                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
             }
         }
     }

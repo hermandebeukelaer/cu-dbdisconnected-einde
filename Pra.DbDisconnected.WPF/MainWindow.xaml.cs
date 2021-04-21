@@ -22,6 +22,15 @@ namespace Pra.DbDisconnected.WPF
             InitializeComponent();
         }
         
+        private void WriteXml()
+        {
+            if (!Directory.Exists(xmlDirectory))
+                Directory.CreateDirectory(xmlDirectory);
+            if (File.Exists(xmlFile))
+                File.Delete(xmlFile);
+            dsBooks.WriteXml(xmlFile, XmlWriteMode.WriteSchema);
+        }
+
         private bool ReadXml()
         {
             bool read = false;
@@ -202,11 +211,7 @@ namespace Pra.DbDisconnected.WPF
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (!Directory.Exists(xmlDirectory))
-                Directory.CreateDirectory(xmlDirectory);
-            if (File.Exists(xmlFile))
-                File.Delete(xmlFile);
-            dsBooks.WriteXml(xmlFile, XmlWriteMode.WriteSchema);
+            WriteXml();
         }
 
         private void Sort_Click(object sender, RoutedEventArgs e)

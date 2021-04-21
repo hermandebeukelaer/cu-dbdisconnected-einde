@@ -15,7 +15,7 @@ namespace Pra.DbDisconnected.WPF
 
         private DataSet dsBooks = new DataSet("Bibliotheek");
         private static readonly string xmlDirectory = Directory.GetCurrentDirectory() + "/XMLBestanden";
-        private static readonly string xmlFile = Directory.GetCurrentDirectory() + "/XMLBestanden/boeken.xml";
+        private static readonly string xmlFile = xmlDirectory + "/boeken.xml";
 
         public MainWindow()
         {

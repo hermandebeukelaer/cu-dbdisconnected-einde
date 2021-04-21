@@ -194,8 +194,6 @@ namespace Pra.DbDisconnected.WPF
                 CreateTables();
                 FillTables();
             }
-            dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
-            dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
             UpdateGui();
         }
 
@@ -226,10 +224,11 @@ namespace Pra.DbDisconnected.WPF
         private void AddAuthor_Click(object sender, RoutedEventArgs e)
         {
             string author = txtAuthor.Text.Trim();
+
             AddAuthor(author);
-            dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
-            UpdateGui();
+
             txtAuthor.Clear();
+            UpdateGui();
         }
 
         private void RemoveAuthor_Click(object sender, RoutedEventArgs e)
@@ -239,8 +238,6 @@ namespace Pra.DbDisconnected.WPF
                 string authorId = dgAuthors.SelectedValue.ToString();
                 RemoveAuthor(authorId);
                 UpdateGui();
-                dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
-                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
             }
         }
 
@@ -258,9 +255,9 @@ namespace Pra.DbDisconnected.WPF
 
                 AddBook(title, authorId, publisherId, year);
 
-                dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
                 txtTitle.Clear();
                 txtYear.Clear();
+                UpdateGui();
             }
             catch (Exception ex)
             {

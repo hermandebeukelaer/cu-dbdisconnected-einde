@@ -33,16 +33,12 @@ namespace Pra.DbDisconnected.WPF
 
         private bool ReadXml()
         {
-            bool read = false;
-            if (Directory.Exists(xmlDirectory))
+            if (Directory.Exists(xmlDirectory) && File.Exists(xmlFile))
             {
-                if (File.Exists(xmlFile))
-                {
-                    dsBooks.ReadXml(xmlFile, XmlReadMode.ReadSchema);
-                    read = true;
-                }
+                dsBooks.ReadXml(xmlFile, XmlReadMode.ReadSchema);
+                return true;
             }
-            return read;
+            return false;
         }
 
         private void CreateTables()

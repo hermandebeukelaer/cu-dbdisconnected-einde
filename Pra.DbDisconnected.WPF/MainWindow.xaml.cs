@@ -157,29 +157,31 @@ namespace Pra.DbDisconnected.WPF
             books.Rows.Add(newBook);
         }
 
-        private void UpdateAuthorAndPublisherComboBoxes()
+        private void UpdateGui()
         {
-            ComboBoxItem itm;
-            
-            cmbAuthors.Items.Clear();
-            cmbPublishers.Items.Clear();
-
             DataTable authors = dsBooks.Tables["Auteur"];
-            for (int counter = 0; counter < authors.Rows.Count; counter++)
+            DataTable publishers = dsBooks.Tables["Uitgever"];
+            DataTable books = dsBooks.Tables["Boeken"];
+
+            dgAuthors.ItemsSource = authors.DefaultView;
+            dgBooks.ItemsSource = books.DefaultView;
+
+            cmbAuthors.Items.Clear();
+            foreach (DataRow author in authors.Rows)
             {
-                itm = new ComboBoxItem();
-                itm.Content = authors.Rows[counter]["auteurNaam"];
-                itm.Tag = authors.Rows[counter]["auteurID"];
+                ComboBoxItem itm = new ComboBoxItem();
+                itm.Content = author["auteurNaam"];
+                itm.Tag = author["auteurID"];
                 cmbAuthors.Items.Add(itm);
             }
             cmbAuthors.SelectedIndex = 0;
 
-            DataTable publishers = dsBooks.Tables["Uitgever"];
-            for (int counter = 0; counter < publishers.Rows.Count; counter++)
+            cmbPublishers.Items.Clear();
+            foreach (DataRow publisher in publishers.Rows)
             {
-                itm = new ComboBoxItem();
-                itm.Content = publishers.Rows[counter]["uitgeverNaam"];
-                itm.Tag = publishers.Rows[counter]["uitgeverID"];
+                ComboBoxItem itm = new ComboBoxItem();
+                itm.Content = publisher["uitgeverNaam"];
+                itm.Tag = publisher["uitgeverID"];
                 cmbPublishers.Items.Add(itm);
             }
             cmbPublishers.SelectedIndex = 0;
@@ -194,7 +196,7 @@ namespace Pra.DbDisconnected.WPF
             }
             dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
             dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
-            UpdateAuthorAndPublisherComboBoxes();
+            UpdateGui();
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -226,7 +228,7 @@ namespace Pra.DbDisconnected.WPF
             string author = txtAuthor.Text.Trim();
             AddAuthor(author);
             dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
-            UpdateAuthorAndPublisherComboBoxes();
+            UpdateGui();
             txtAuthor.Clear();
         }
 
@@ -236,7 +238,7 @@ namespace Pra.DbDisconnected.WPF
             {
                 string authorId = dgAuthors.SelectedValue.ToString();
                 RemoveAuthor(authorId);
-                UpdateAuthorAndPublisherComboBoxes();
+                UpdateGui();
                 dgAuthors.ItemsSource = dsBooks.Tables["Auteur"].DefaultView;
                 dgBooks.ItemsSource = dsBooks.Tables["Boeken"].DefaultView;
             }

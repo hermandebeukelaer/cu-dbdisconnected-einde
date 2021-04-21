@@ -12,13 +12,15 @@ namespace Pra.DbDisconnected.WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private DataSet dsBooks = new DataSet("Bibliotheek");
+        private static readonly string xmlDirectory = Directory.GetCurrentDirectory() + "/XMLBestanden";
+        private static readonly string xmlFile = Directory.GetCurrentDirectory() + "/XMLBestanden/boeken.xml";
+
         public MainWindow()
         {
             InitializeComponent();
         }
-        DataSet dsBooks = new DataSet("Bibliotheek");
-        string xmlDirectory = Directory.GetCurrentDirectory() + "/XMLBestanden";
-        string xmlFile = Directory.GetCurrentDirectory() + "/XMLBestanden/boeken.xml";
         
         private bool ReadXml()
         {
